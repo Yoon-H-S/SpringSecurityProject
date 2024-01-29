@@ -33,10 +33,9 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatcher("/api/**") // api로 시작하는 요청에만 반응
                 .authorizeRequests()
                 .antMatchers("/api/messages").hasRole("MANAGER")
+                .antMatchers("/api/login").permitAll()
                 .anyRequest().authenticated();
-//        .and()
-//                .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
-        http.csrf().disable();
+//        http.csrf().disable();
 
         http
                 .exceptionHandling()
@@ -54,15 +53,6 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
                 .setAuthenticationManager(authenticationManagerBean())
                 .loginProcessingUrl("/api/login");
     }
-
-//    @Bean
-//    public AjaxLoginProcessingFilter ajaxLoginProcessingFilter() throws Exception {
-//        AjaxLoginProcessingFilter ajaxLoginProcessingFilter = new AjaxLoginProcessingFilter();
-//        ajaxLoginProcessingFilter.setAuthenticationManager(authenticationManagerBean());
-//        ajaxLoginProcessingFilter.setAuthenticationSuccessHandler(ajaxAuthenticationSuccessHandler());
-//        ajaxLoginProcessingFilter.setAuthenticationFailureHandler(ajaxAuthenticationFailureHandler());
-//        return ajaxLoginProcessingFilter;
-//    }
 
     @Bean
     public AuthenticationProvider ajaxAuthenticationProvider() {
