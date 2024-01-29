@@ -33,25 +33,36 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatcher("/api/**") // api로 시작하는 요청에만 반응
                 .authorizeRequests()
                 .antMatchers("/api/messages").hasRole("MANAGER")
-                .anyRequest().authenticated()
-        .and()
-                .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
+                .anyRequest().authenticated();
+//        .and()
+//                .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
         http.csrf().disable();
 
         http
                 .exceptionHandling()
                 .authenticationEntryPoint(new AjaxLoginAuthenticationEntryPoint())
                 .accessDeniedHandler(ajaxAccessDeniedHandler());
+
+        customConfigurerAjax(http);
     }
 
-    @Bean
-    public AjaxLoginProcessingFilter ajaxLoginProcessingFilter() throws Exception {
-        AjaxLoginProcessingFilter ajaxLoginProcessingFilter = new AjaxLoginProcessingFilter();
-        ajaxLoginProcessingFilter.setAuthenticationManager(authenticationManagerBean());
-        ajaxLoginProcessingFilter.setAuthenticationSuccessHandler(ajaxAuthenticationSuccessHandler());
-        ajaxLoginProcessingFilter.setAuthenticationFailureHandler(ajaxAuthenticationFailureHandler());
-        return ajaxLoginProcessingFilter;
+    private void customConfigurerAjax(HttpSecurity http) throws Exception {
+        http
+                .apply(new AjaxLoginConfigurer<>())
+                .successHandlerAjax(ajaxAuthenticationSuccessHandler())
+                .failureHandlerAjax(ajaxAuthenticationFailureHandler())
+                .setAuthenticationManager(authenticationManagerBean())
+                .loginProcessingUrl("/api/login");
     }
+
+//    @Bean
+//    public AjaxLoginProcessingFilter ajaxLoginProcessingFilter() throws Exception {
+//        AjaxLoginProcessingFilter ajaxLoginProcessingFilter = new AjaxLoginProcessingFilter();
+//        ajaxLoginProcessingFilter.setAuthenticationManager(authenticationManagerBean());
+//        ajaxLoginProcessingFilter.setAuthenticationSuccessHandler(ajaxAuthenticationSuccessHandler());
+//        ajaxLoginProcessingFilter.setAuthenticationFailureHandler(ajaxAuthenticationFailureHandler());
+//        return ajaxLoginProcessingFilter;
+//    }
 
     @Bean
     public AuthenticationProvider ajaxAuthenticationProvider() {
