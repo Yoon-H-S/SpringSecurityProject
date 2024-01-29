@@ -2,6 +2,7 @@ package io.security.corespringsecurity.security.provider;
 
 import io.security.corespringsecurity.security.service.AccountContext;
 import io.security.corespringsecurity.security.token.AjaxAuthenticationToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -10,24 +11,32 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.transaction.Transactional;
+
+@Slf4j
 public class AjaxAuthenticationProvider implements AuthenticationProvider {
-    // Form 방식의 Provider와 동작은 같지만, Token을 AjaxAuthenticationToken을 사용한다는 것만 다르다.
+
     @Autowired
     private UserDetailsService userDetailsService;
+
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder;
+
+    public AjaxAuthenticationProvider(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
+    @Transactional
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        System.out.println("AjaxAuthenticationProvider");
 
-        String username = authentication.getName();
+        String loginId = authentication.getName();
         String password = (String) authentication.getCredentials();
 
-        AccountContext accountContext = (AccountContext) userDetailsService.loadUserByUsername(username);
+        AccountContext accountContext = (AccountContext)userDetailsService.loadUserByUsername(loginId);
 
-        if (!passwordEncoder.matches(password, accountContext.getAccount().getPassword())) {
-            throw new BadCredentialsException("BadCredentialsException");
+        if (!passwordEncoder.matches(password, accountContext.getPassword())) {
+            throw new BadCredentialsException("Invalid password");
         }
 
         return new AjaxAuthenticationToken(accountContext.getAccount(), null, accountContext.getAuthorities());
