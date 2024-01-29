@@ -43,6 +43,10 @@ public class UserController {
 	@PostConstruct
 	public void init() {
 		Account account = new Account("user", passwordEncoder.encode("1111"), "abc@naver.com", "10", "ROLE_USER");
+		Account account2 = new Account("manager", passwordEncoder.encode("1111"), "abc@naver.com", "10", "ROLE_MANAGER");
+		Account account3 = new Account("admin", passwordEncoder.encode("1111"), "abc@naver.com", "10", "ROLE_ADMIN");
 		userService.createUser(account);
+		userService.createUser(account2);
+		userService.createUser(account3);
 	}
 }
